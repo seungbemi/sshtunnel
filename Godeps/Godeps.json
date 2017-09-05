@@ -1,0 +1,14 @@
+{
+	"ImportPath": "sshtunnel",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Packages": [
+		"gofred"
+	],
+	"Deps": [
+		{
+			"ImportPath": "gofred",
+			"Rev": "b9fd196e65f0c9903406c9f71b6b92e9bc83698c"
+		}
+	]
+}
