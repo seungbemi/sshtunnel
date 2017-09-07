@@ -129,7 +129,7 @@ func main() {
 		}
 		if len(aliasCommand) > 0 {
 			items = []gofred.Item{gofred.NewItem("Not Aliased on loopback list", "Run alias command", noAutocomplete).
-				AddIcon("icon.png", "").Executable(fmt.Sprintf(`osascript -e "do shell script \"%s\" with administrator privileges"`, aliasCommand))}
+				AddIcon("icon.png", "").Executable(fmt.Sprintf(`##osascript -e "do shell script \"%s\" with administrator privileges"`, aliasCommand))}
 		}
 		items = append(items, gofred.NewItem("Add new config", noSubtitle, "create ").AddIcon("plus.png", ""))
 	} else {
