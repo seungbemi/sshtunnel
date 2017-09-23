@@ -8,6 +8,7 @@ import (
 
 // Response has all the items for showing on alfred
 type Response struct {
+	Rerun  float32           `json:"rerun,omitempty"`
 	VarMap map[string]string `json:"variables,omitempty"`
 	Items  []Item            `json:"items,omitempty"`
 }

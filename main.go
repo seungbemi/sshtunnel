@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"gofred"
@@ -10,6 +9,10 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"gopkg.in/yaml.v2"
+
+	_ "gopkg.in/yaml.v2"
 )
 
 const (
@@ -19,21 +22,21 @@ const (
 )
 
 type host struct {
-	RemoteUser   string   `json:"RemoteUser"`
-	RemoteHost   string   `json:"RemoteHost"`
-	RemotePort   string   `json:"RemotePort"`
-	ForwardPorts []string `json:"ForwardPorts"`
+	RemoteUser   string   `yaml:"RemoteUser"`
+	RemoteHost   string   `yaml:"RemoteHost"`
+	RemotePort   string   `yaml:"RemotePort"`
+	ForwardPorts []string `yaml:"ForwardPorts"`
 }
 
 // Config includes
 type Config struct {
-	host                  `json:",inline"`
-	ServerAliveInterval   int    `json:"ServerAliveInterval"`
-	ServerAliveCountMax   int    `json:"ServerAliveCountMax"`
-	StrictHostKeyChecking string `json:"StrictHostKeyChecking"`
-	LocalUser             string `json:"LocalUser"`
-	IdentityFile          string `json:"IdentityFile"`
-	LocalBindAddress      string `json:"LocalBindAddress"`
+	host                  `yaml:",inline"`
+	ServerAliveInterval   int    `yaml:"ServerAliveInterval"`
+	ServerAliveCountMax   int    `yaml:"ServerAliveCountMax"`
+	StrictHostKeyChecking string `yaml:"StrictHostKeyChecking"`
+	LocalUser             string `yaml:"LocalUser"`
+	IdentityFile          string `yaml:"IdentityFile"`
+	LocalBindAddress      string `yaml:"LocalBindAddress"`
 }
 
 // Message adds simple message
@@ -76,16 +79,15 @@ func main() {
 	if flag.Arg(0) != "create" {
 		aliasCommand := ""
 		for _, config := range configs {
-			file, err := os.Open(configFolder + "/" + config.Name())
+			var remote Config
+			bt, err := ioutil.ReadFile(configFolder + "/" + config.Name())
 			if err != nil {
 				Message(response, "error", err.Error(), true)
 				return
 			}
 
-			var remote Config
-			decoder := json.NewDecoder(file)
-
-			if err := decoder.Decode(&remote); err != nil {
+			err = yaml.Unmarshal(bt, &remote)
+			if err != nil {
 				Message(response, "error", err.Error(), true)
 				return
 			}
@@ -105,8 +107,8 @@ func main() {
 				aliasCommand += fmt.Sprintf("ifconfig lo0 alias %s", remote.LocalBindAddress)
 				continue
 			}
-
-			shellCommand := runCommand(config.Name(), remote)
+			name := strings.TrimSuffix(config.Name(), ".yml")
+			shellCommand := runCommand(name, remote)
 			status := "Off"
 			command := "Start"
 			n, err := exec.Command("bash", "-c", fmt.Sprintf("ps aux | grep ssh | grep -v grep | grep %s | wc -l", remote.LocalBindAddress)).CombinedOutput()
@@ -116,12 +118,12 @@ func main() {
 					status = "On"
 					command = "Stop"
 					shellCommand = fmt.Sprintf("%s#%s#kill -9 $(ps aux | grep ssh | grep -v grep | grep %s | awk '{print $2}')",
-						config.Name(), remote.LocalBindAddress, remote.LocalBindAddress)
+						name, remote.LocalBindAddress, remote.LocalBindAddress)
 				}
 			}
-			item := gofred.NewItem(config.Name(), command+" "+config.Name(), noAutocomplete).AddIcon(status+".png", "").
-				AddCommandKeyAction("Modify config", "modify "+config.Name(), true).
-				AddOptionKeyAction("Remove config", "remove "+config.Name(), true)
+			item := gofred.NewItem(name, command+" "+name, noAutocomplete).AddIcon(status+".png", "").
+				AddCommandKeyAction("Modify config", "modify "+name, true).
+				AddOptionKeyAction("Remove config", "remove "+name, true)
 			if valid {
 				item = item.Executable(shellCommand)
 			}

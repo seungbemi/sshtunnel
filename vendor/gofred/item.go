@@ -16,9 +16,10 @@ type IconInfo struct {
 
 // SubInfo include optional information
 type SubInfo struct {
-	Subtitle string `json:"subtitle,omitempty"` // Optional
-	Arg      string `json:"arg,omitempty"`      // Recommended
-	Valid    bool   `json:"valid"`              // Default = true
+	Subtitle string            `json:"subtitle,omitempty"` // Optional
+	VarMap   map[string]string `json:"variables,omitempty"`
+	Arg      string            `json:"arg,omitempty"` // Recommended
+	Valid    bool              `json:"valid"`         // Default = true
 }
 
 // Modifiers includes subinfo for modifiers
