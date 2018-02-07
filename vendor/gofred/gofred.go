@@ -20,18 +20,6 @@ func NewResponse() *Response {
 	return resp
 }
 
-// NewItem create a new item with basic information
-func NewItem(title, subtitle, autocomplete string) Item {
-	return Item{
-		Title:        title,
-		Autocomplete: autocomplete,
-		SubInfo: SubInfo{
-			Subtitle: subtitle,
-			Valid:    false,
-		},
-	}
-}
-
 // NewItemOnce returns a item to be shown
 func NewItemOnce(title, subtitle, iconType, iconPath, arg, autocomplete, uid, itemType string, valid bool, mods Modifiers) Item {
 	return Item{
@@ -47,6 +35,7 @@ func NewItemOnce(title, subtitle, iconType, iconPath, arg, autocomplete, uid, it
 			Subtitle: subtitle,
 			Valid:    valid,
 			Arg:      arg,
+			VarMap:   make(map[string]string),
 		},
 		Mods: mods,
 	}

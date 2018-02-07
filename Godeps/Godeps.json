@@ -5,7 +5,7 @@
 	"Deps": [
 		{
 			"ImportPath": "gofred",
-			"Rev": "e734c5de35ae7a1907fe694019eb2c5c63d7ba62"
+			"Rev": "7762eb169e3fbe6e560126594ca52cf08b7b7eca"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",

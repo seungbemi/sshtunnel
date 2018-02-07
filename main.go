@@ -107,8 +107,10 @@ func main() {
 				aliasCommand += fmt.Sprintf("ifconfig lo0 alias %s", remote.LocalBindAddress)
 				continue
 			}
+
 			name := strings.TrimSuffix(config.Name(), ".yml")
-			shellCommand := runCommand(name, remote)
+			shellCommand := runCommand(remote)
+			rebootCommand := shellCommand
 			status := "Off"
 			command := "Start"
 			n, err := exec.Command("bash", "-c", fmt.Sprintf("ps aux | grep ssh | grep -v grep | grep %s | wc -l", remote.LocalBindAddress)).CombinedOutput()
@@ -117,27 +119,29 @@ func main() {
 				if err == nil && number > 0 {
 					status = "On"
 					command = "Stop"
-					shellCommand = fmt.Sprintf("%s#%s#kill -9 $(ps aux | grep ssh | grep -v grep | grep %s | awk '{print $2}')",
-						name, remote.LocalBindAddress, remote.LocalBindAddress)
+					shellCommand = fmt.Sprintf("kill -9 $(ps aux | grep ssh | grep -v grep | grep %s | awk '{print $2}')", remote.LocalBindAddress)
+					rebootCommand = "(" + shellCommand + ") && " + rebootCommand
 				}
 			}
 			item := gofred.NewItem(name, command+" "+name, noAutocomplete).AddIcon(status+".png", "").
-				AddCommandKeyAction("Modify config", "modify "+name, true).
-				AddOptionKeyAction("Remove config", "remove "+name, true)
+				AddVariables(gofred.NewVariable("name", name), gofred.NewVariable("remote", remote.LocalBindAddress)).
+				AddOptionKeyAction("Modify config", "modify", true).
+				AddCtrlKeyAction("Remove config", "remove", true)
+
 			if valid {
-				item = item.Executable(shellCommand)
+				item = item.Executable(shellCommand).AddCommandKeyAction("Reboot "+name, rebootCommand, true)
 			}
 			items = append(items, item)
 		}
 		if len(aliasCommand) > 0 {
 			items = []gofred.Item{gofred.NewItem("Not Aliased on loopback list", "Run alias command", noAutocomplete).
-				AddIcon("icon.png", "").Executable(fmt.Sprintf(`##osascript -e "do shell script \"%s\" with administrator privileges"`, aliasCommand))}
+				AddIcon("icon.png", "").Executable(fmt.Sprintf(`osascript -e "do shell script \"%s\" with administrator privileges"`, aliasCommand))}
 		}
 		items = append(items, gofred.NewItem("Add new config", noSubtitle, "create ").AddIcon("plus.png", ""))
 	} else {
 		response.AddVariable("filename", flag.Arg(1))
 		items = append(items, gofred.NewItem("Add new config", fmt.Sprintf("write name ... \"%s\"", flag.Arg(1)), noAutocomplete).
-			AddIcon("plus.png", "").Executable("newConfig"))
+			AddIcon("plus.png", "").Executable("new"))
 	}
 	response.AddItems(items...)
 	fmt.Println(response)
@@ -156,8 +160,8 @@ func valid(conf Config) bool {
 	return true
 }
 
-func runCommand(name string, conf Config) string {
-	cmd := fmt.Sprintf("%s#%s#/usr/local/bin/autossh -M 0 -f -q -N", name, conf.LocalBindAddress)
+func runCommand(conf Config) string {
+	cmd := fmt.Sprintf("/usr/local/bin/autossh -M 0 -f -q -N")
 	if len(conf.RemotePort) > 0 {
 		cmd += fmt.Sprintf(" -p %s", conf.RemotePort)
 	}
