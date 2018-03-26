@@ -34,8 +34,8 @@ type Config struct {
 	ServerAliveInterval   int    `yaml:"ServerAliveInterval"`
 	ServerAliveCountMax   int    `yaml:"ServerAliveCountMax"`
 	StrictHostKeyChecking string `yaml:"StrictHostKeyChecking"`
-	LocalUser             string `yaml:"LocalUser"`
 	IdentityFile          string `yaml:"IdentityFile"`
+	ProxyCommand          string `yaml:"ProxyCommand"`
 	LocalBindAddress      string `yaml:"LocalBindAddress"`
 }
 
@@ -177,14 +177,19 @@ func runCommand(conf Config) string {
 	if len(conf.StrictHostKeyChecking) > 0 {
 		cmd += fmt.Sprintf(" -o StrictHostKeyChecking=%s", conf.StrictHostKeyChecking)
 	}
+	forwardPorts := ""
 	if len(conf.ForwardPorts) > 0 {
-		forwardPorts := ""
 		for _, str := range conf.ForwardPorts {
 			forwardPorts += fmt.Sprintf(" -L %s%s", conf.LocalBindAddress, str)
 		}
-		cmd += forwardPorts
 	}
-	cmd += fmt.Sprintf(" %s@%s", conf.RemoteUser, conf.RemoteHost)
+
+	forwardPorts += fmt.Sprintf(" %s@%s", conf.RemoteUser, conf.RemoteHost)
+	if len(conf.ProxyCommand) > 0 {
+		cmd += fmt.Sprintf(" -o ProxyCommand \"%s\"", conf.ProxyCommand)
+	}
+
+	cmd += forwardPorts
 
 	return cmd
 }
