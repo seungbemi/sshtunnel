@@ -1,11 +1,11 @@
 {
 	"ImportPath": "sshtunnel",
 	"GoVersion": "go1.8",
-	"GodepVersion": "v79",
+	"GodepVersion": "v80",
 	"Deps": [
 		{
 			"ImportPath": "gofred",
-			"Rev": "7762eb169e3fbe6e560126594ca52cf08b7b7eca"
+			"Rev": "1c67ae091ffe62ca983b9417db5a05d29a2b4bf9"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",

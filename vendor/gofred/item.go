@@ -147,7 +147,7 @@ func (i Item) AddCommandKeyAction(subtitle, arg string, executable bool) Item {
 
 // AddCommandKeyVariables adds variables for command key pressed action
 func (i Item) AddCommandKeyVariables(vars ...Variable) Item {
-	return i.addVariables(modKeyOption, vars...)
+	return i.addVariables(modKeyCommand, vars...)
 }
 
 func (i Item) addModifierAction(key modKey, subtitle, arg string, executable bool) Item {
