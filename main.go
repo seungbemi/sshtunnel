@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gofred"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 
+	"github.com/seungbemi/gofred"
 	"gopkg.in/yaml.v2"
 )
 
